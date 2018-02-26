@@ -13,7 +13,7 @@ void setup() {					// Arduino setup
 	DebugSerial.begin(9600);
 	Serial.begin(9600);
 
-	motorA.Initialise(); // Initialise motor A
+	motorInitialise(); // Initialise motors
 	PIDA.SetMode(AUTOMATIC); // Setup PID controller
 
   	Serial.print("Setup Complete!"); 
@@ -22,8 +22,7 @@ void setup() {					// Arduino setup
 
 void loop() {
 
-	analogWrite(PWM1,200);
-	motorA.Debouncer();
+	analogWrite(PWM1,100);
 	PIDA.Compute();
 	analogWrite(3,motorA.out);
 }
