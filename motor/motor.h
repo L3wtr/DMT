@@ -3,14 +3,12 @@
 
 class motorClass {
 	private:
-		//double setPWM; // Motor setpoint
 		char motorLabel; // Identify motor
 
 		volatile bool highFlag; // Toggles between rising and falling states
 		volatile int current; // Current clock time
 		volatile int previous; // Previous clock time
 		volatile int pulse; // Pulse width
-		//volatile int PWMarray[1]; // Stores last two calculated PWM values
 		volatile int pulseFiltered[2]; // First order signal smoothing filter array
 
 	public:
@@ -22,8 +20,7 @@ class motorClass {
 
 		void PulseRise(); // Store the clock time on the PWM rise trigger
 		void PulseFall(); // Evaluate the pulse length on the PWM fall trigger
-		//void Filter(); // Filter the pulse length signal using a first order smoothing filter
-
+		void DebugDisplay(); // Display chosen variable to the serial monitor
 };
 extern motorClass motorA; // Declaring motor A class
 extern motorClass motorB; // Declaring motor B class
