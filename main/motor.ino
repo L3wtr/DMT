@@ -17,5 +17,5 @@ void motorLoop() {
   PIDA.Compute(); // Evaluate new PID output signal
   analogWrite(outPinA, motorA.out); // Set output PWM signal to motor A
 
-  motorA.DebugDisplay(); // Output debug display
+  //motorA.DebugDisplay(); // Output debug display
 }

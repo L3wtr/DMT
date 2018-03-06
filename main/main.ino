@@ -3,31 +3,35 @@ SoftwareSerial DebugSerial(2, 3); // RX, TX
 
 #include <BlynkSimpleStream.h>
 #include <PID_v1.h>
-
 #include "motor.h"
 
-// Declaring timer object and globals
-BlynkTimer timer;
+// Global Declarations // ==================================================
+//#pragma region
+
+char auth[] = "6f20249fa4f84963ab71e22826a97068"; // Blynk authorize token
+
+BlynkTimer timer; // Declaring timer object and globals
 int countRemain, countRemainReset, counter;
 
-// Declaring notifications global
-bool notifEnable;
+bool notifEnable; // Declaring notifications global
 
 // Declaring Motor A PID control global
 PID PIDA(&motorA.in, &motorA.out, &motorA.set, 20, 0, 0, DIRECT);
 
-char auth[] = "6f20249fa4f84963ab71e22826a97068"; // Blynk authorize token
+//#pragma endregion
+// Main // =================================================================
 
 void setup() {                  // Main Arduino setup
 
   DebugSerial.begin(9600); // Debug console
 
+  Serial.begin(9600); // Blynk USB Serial
+  Blynk.begin(Serial, auth);
+
   blynkSetup(); // Setup Blynk modes
   countdownSetup(); // Setup countdown mode
 
   motorSetup(); // Setup motor and PID control
-
-  Serial.println("Setup Complete!");
 }
 
 void loop() {                   // Main Arduino loop
