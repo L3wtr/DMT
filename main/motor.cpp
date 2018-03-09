@@ -20,21 +20,18 @@ void setMode(char mode) {				// Update desired motor position for chosen mode
 
   switch (mode) {
     case urban:
-      motorA.increment = 1;
-      motorB.increment = 1;
-      motorC.increment = 1;
+      motorA.increment = 1; motorB.increment = 1; motorC.increment = 1;
+      motorA.offset = 100; motorB.offset = 100; motorC.offset = 100;
       break;
 
     case motorway:
-      motorA.increment = 1;
-      motorB.increment = 1;
-      motorC.increment = 1;
+      motorA.increment = 1; motorB.increment = 1; motorC.increment = 1;
+      motorA.offset = 100; motorB.offset = 100; motorC.offset = 100;
       break;
 
     case underground:
-      motorA.increment = 1;
-      motorB.increment = 1;
-      motorC.increment = 1;
+      motorA.increment = 1; motorB.increment = 1; motorC.increment = 1;
+      motorA.offset = 100; motorB.offset = 100; motorC.offset = 100;
       break;
   }
 }
@@ -55,13 +52,6 @@ void motorClass::UpdateSet() {			// Update PID control input parameters
 void motorClass::Encoder() { 			// Encoder count of the number of motor shaft rotations (pre-gearing)
 
   encoderPos++; // Increment rotation count (pre-gearing)
-}
-
-void motorClass::DebugDisplay() { 		// Print out chosen variable to serial monitor
-
-  Serial.print(in); Serial.print(',');
-  Serial.print(set); Serial.print(',');
-  Serial.println(out);
 }
 
 void assignEncoderA() {

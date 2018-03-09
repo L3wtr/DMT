@@ -77,22 +77,22 @@ BLYNK_WRITE(vInTimer) {          // Sets manual timer setting on slider change
 
 BLYNK_WRITE(vInMode) {           // Sets motion mode on menu change
 
-   char speedSetting = param.asInt();
-  switch (speedSetting) {
-    case 1: // Urban road mode
+  char selectMode = param.asInt();
+
+  switch (selectMode) {
+    case urban: // Urban road mode
     Blynk.virtualWrite(vOutMode, 60);
+    setMode(urban);
     break;
 
-    case 2: // Motorway mode
+    case motorway: // Motorway mode
     Blynk.virtualWrite(vOutMode, 80);
+    setMode(motorway);
     break;
 
-    case 3: // Underground mode
-    Blynk.virtualWrite(vOutMode, 30);
-    break;
-
-    default: // Defaults to urban road mode
-    Blynk.virtualWrite(vOutMode, 60);
+    case underground: // Underground mode
+    Blynk.virtualWrite(vOutMode, 20);
+    setMode(underground);
     break;
   }
 }

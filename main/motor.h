@@ -1,9 +1,9 @@
 #ifndef motor_h
 #define motor_h
 
-#define urban		1 // Urban road motor speed mode
-#define motorway	2 // Motorway motor speed mode
-#define underground	3 // London underground motor speed mode
+#define urban		1 // Speed mode label
+#define motorway	2
+#define underground	3
 
 #define outMin 		25 // Minimum PID output value
 #define outMax 		230 // Maximum PID output value
@@ -12,7 +12,7 @@
 #define outPinB		0
 #define outPinC		0
 
-#define setScaling 	( (0.625*count) - 19 ) // Scale the count mode with encoder speed (linear relationship)
+#define setScaling	( (0.625*count) - 19 ) // Scale the count mode with encoder speed (linear relationship)
 
 #define MotorPinA	7 // Arduino interrupt input pins (must share the same interrupt vectors)
 #define MotorPinB	0
@@ -22,9 +22,9 @@ class motorClass {
   private:
     volatile double encoderPos; // Encoder cycle count
     volatile double count; // Running total set cycle count
+    volatile double increment; // Scale of count increment
 
   public:
-    volatile double increment; // Scale of count increment
 
     char Kp, Ki, Kd; // PID control constants
     double set, in, out; // PID control
