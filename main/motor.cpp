@@ -4,7 +4,7 @@
 // Initialising motor constructors (default 0)
 motorClass motorA(0, 0), motorB(0, 0), motorC(0, 0);
 
-void motorInitialise() {				// Initialising motors
+void motorInitialise() {          // Initialising motors
 
   pinMode(MotorPinA, INPUT_PULLUP); // Initialise Motor A interrupt inputs
   enableInterrupt(MotorPinA, assignEncoderA, FALLING);
@@ -16,27 +16,27 @@ void motorInitialise() {				// Initialising motors
   enableInterrupt(MotorPinC, assignEncoderC, FALLING);
 }
 
-void setMode(char mode) {				// Update desired motor position for chosen mode
+void setMode(char mode) {         // Update desired motor position for chosen mode
 
   switch (mode) {
     case urban:
       motorA.increment = 1; motorB.increment = 1; motorC.increment = 1;
-      motorA.offset = 100; motorB.offset = 100; motorC.offset = 100;
+      motorA.offset = MotorCycleA / 4; motorB.offset = MotorCycleB / 4; motorC.offset = MotorCycleC / 4;
       break;
 
     case motorway:
       motorA.increment = 1; motorB.increment = 1; motorC.increment = 1;
-      motorA.offset = 100; motorB.offset = 100; motorC.offset = 100;
+      motorA.offset = MotorCycleA / 8; motorB.offset = MotorCycleB / 8; motorC.offset = MotorCycleC / 8;
       break;
 
     case underground:
       motorA.increment = 1; motorB.increment = 1; motorC.increment = 1;
-      motorA.offset = 100; motorB.offset = 100; motorC.offset = 100;
+      motorA.offset = MotorCycleA / 8; motorB.offset = MotorCycleB / 8; motorC.offset = MotorCycleC / 8;
       break;
   }
 }
 
-void motorClass::UpdateSet() {			// Update PID control input parameters
+void motorClass::UpdateSet() {    // Update PID control input parameters
 
   count += increment; // Running total of motor position
 
@@ -49,7 +49,12 @@ void motorClass::UpdateSet() {			// Update PID control input parameters
   in = encoderPos; // Update motor PID input
 }
 
-void motorClass::Encoder() { 			// Encoder count of the number of motor shaft rotations (pre-gearing)
+void motorClass::UpdateOffset() { // Increment motor offset by set number of counts
+
+  count += offset;
+}
+
+void motorClass::Encoder() {      // Encoder count of the number of motor shaft rotations (pre-gearing)
 
   encoderPos++; // Increment rotation count (pre-gearing)
 }

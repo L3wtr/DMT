@@ -18,15 +18,20 @@
 #define MotorPinB	0
 #define MotorPinC 	0
 
+#define MotorCycleA 100
+#define MotorCycleB 100
+#define MotorCycleC 100
+
 class motorClass {
   private:
     volatile double encoderPos; // Encoder cycle count
     volatile double count; // Running total set cycle count
-    volatile double increment; // Scale of count increment
 
   public:
+    volatile double increment; // Scale of count increment
+    volatile double offset; // Set size of set point offset
 
-    char Kp, Ki, Kd; // PID control constants
+    int Kp, Ki, Kd; // PID control constants
     double set, in, out; // PID control
 
     motorClass(double initialSet, double initialPos): set(initialSet), encoderPos(initialPos) {} // Motor class constructor
@@ -34,6 +39,7 @@ class motorClass {
     void UpdateSet(); // Update PID control input parameters
     void Encoder(); // Increment the encoder count when triggered
     void DebugDisplay(); // Display chosen variable to the serial monitor
+    void UpdateOffset(); // Increment motor offset by set number of counts
 };
 
 extern motorClass motorA; // Declaring motor A class
