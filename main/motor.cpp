@@ -1,8 +1,19 @@
 #include <EnableInterrupt.h>
 #include "motor.h"
 
-// Initialising motor constructors (default 0)
-motorClass motorA(0, 0), motorB(0, 0), motorC(0, 0);
+// Global Declarations // ==================================================
+
+// Assigning motor constructors (default 0)
+motorClass motorA(0, 0, dirPinA), motorB(0, 0, dirPinB), motorC(0, 0, dirPinC);
+
+int orderIndex = 1; // Initial order index
+
+int rotTbl[] = {Zero, ZeroFive, ZeroFive + FiveTen, ZeroFive + FiveTen + TenFift, ZeroFive + FiveTen + TenFift + FiftTwenty}; // Assigning rotation lookup table [0, 0-5, 0-10, 0-15, 0-20]
+int actTbl[] = {ZeroFive + ZeroFive, ZeroFive + FiveTen, FiveTen + TenFift, TenFift + FiftTwenty}; // Assigning actuation lookup table [0-5, 5-10, 10-15, 15-20]
+
+
+int motionOrder[20]; // Mode motion order order arrays
+int urbanOrder[] = {1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1}; // Urban mode motion order
 
 void motorInitialise() {          // Initialising motors
 
@@ -16,24 +27,37 @@ void motorInitialise() {          // Initialising motors
   enableInterrupt(MotorPinC, assignEncoderC, FALLING);
 }
 
+// External Functions // ===================================================
+
 void setMode(char mode) {         // Update desired motor position for chosen mode
 
   switch (mode) {
     case urban:
-      motorA.increment = 1; motorB.increment = 1; motorC.increment = 1;
-      motorA.offset = MotorCycleA / 4; motorB.offset = MotorCycleB / 4; motorC.offset = MotorCycleC / 4;
+      motorA.increment = 1; motorB.increment = 1; motorC.increment = 1; // Mode speed (### Dynamic Update TBD ####)
+      memcpy(motionOrder, urbanOrder, sizeof motionOrder); // Assign the current motion order with urban preset
+
       break;
 
     case motorway:
       motorA.increment = 1; motorB.increment = 1; motorC.increment = 1;
-      motorA.offset = MotorCycleA / 8; motorB.offset = MotorCycleB / 8; motorC.offset = MotorCycleC / 8;
+
       break;
 
     case underground:
       motorA.increment = 1; motorB.increment = 1; motorC.increment = 1;
-      motorA.offset = MotorCycleA / 8; motorB.offset = MotorCycleB / 8; motorC.offset = MotorCycleC / 8;
+
       break;
   }
+}
+
+// Internal Functions // ===================================================
+
+void motorClass::Reset() {        // Reset encoder and set positions
+
+  encoderPos = 0; // Reset and update motor PID input
+  count = 0; 
+  set = setScaling; // Reset setpoint
+  analogWrite(dirPin, dir); // Update rotation directions
 }
 
 void motorClass::UpdateSet() {    // Update PID control input parameters
@@ -41,35 +65,75 @@ void motorClass::UpdateSet() {    // Update PID control input parameters
   count += increment; // Running total of motor position
 
   if (count < 0 ) { // Reset in case of overflow
-    encoderPos = 0;
-    count = 0;
+    Reset(); // Reset encoder values
   }
 
-  set = setScaling; // Update motor PID setpoint
   in = encoderPos; // Update motor PID input
 }
 
-void motorClass::UpdateOffset() { // Increment motor offset by set number of counts
+void motorClass::StartEnd(bool &cycleFlag, int cycleCurrent) {    // Assign target count values from the rotation lookup table
 
-  count += offset;
+// Offset initial target position by -5 mm
+  if (dir == forward) {
+    targetCount = rotTbl[cycleIndex - 1];
+  }
+  else if (dir == reverse) {
+    targetCount = rotTbl[cycleIndex + 1];
+  }
+
+  Reset(); // Reset encoder values
+
+  cycleMode = cycleCurrent; // Update current cycle mode
+  cycleFlag = false; // Set the current flag value to false
+}
+
+void motorClass::Actuation(bool &cycleFlag, int cycleCurrent) {   // Assign target count values from the actuation lookup table
+
+  dir = forward; // Set synchronous forward actuation
+  targetCount = actTbl[cycleIndex]; // Change encoder target count
+
+  cycleMode = cycleCurrent; // Update current cycle mode
+  cycleFlag = false; // Set the current flag value to false
 }
 
 void motorClass::Encoder() {      // Encoder count of the number of motor shaft rotations (pre-gearing)
 
   encoderPos++; // Increment rotation count (pre-gearing)
+
+  if (encoderPos > targetCount && cycleMode == FromNeutral) { // Triggers when in position from neutral
+    Reset();
+    cycleInPos = true; // Set the next flag to true
+  }
+
+  else if (encoderPos > targetCount && cycleMode == NeutralAct && dir == forward) { // Triggers at the top of the actuation cycle
+    Reset();
+    dir = reverse; // Reverse direction
+  }
+
+  else if (encoderPos > targetCount && cycleMode == NeutralAct && dir == reverse) { // Triggers at the bottom of the actuation cycle
+      Reset();
+      cycleEnd = true; // Set the next flag to true
+  }
+
+  else if (encoderPos > targetCount && cycleMode == ToNeutral) { // Triggers when back to neutral
+    Reset();
+    cycleReset = true; // Set the next flag to true
+  }
 }
 
-void assignEncoderA() {
+// Assigning Internal Functions To Interrupts // ===========================
 
-  motorA.Encoder();  // Assign Motor A encoder class functions
+void assignEncoderA() {           // Assign Motor A encoder class functions
+
+  motorA.Encoder();
 }
 
-void assignEncoderB() {
+void assignEncoderB() {           // Assign Motor B encoder class functions
 
-  motorB.Encoder();  // Assign Motor B encoder class functions
+  motorB.Encoder();  
 }
 
-void assignEncoderC() {
+void assignEncoderC() {           // Assign Motor C encoder class functions
 
-  motorC.Encoder();  // Assign Motor C encoder class functions
+  motorC.Encoder();  
 }

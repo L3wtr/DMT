@@ -14,9 +14,6 @@ int countRemain, countRemainReset, counter, selectMode;
 
 bool notifEnable; // Declaring notifications global
 
-int order[] = {1, 2, 3}; // Initial motor offset order
-int motorIndex = 1; // Initial motor offset index
-
 // Declaring Motor A PID control global
 PID PIDA(&motorA.in, &motorA.out, &motorA.set, 20, 0, 0, DIRECT);
 PID PIDB(&motorB.in, &motorB.out, &motorB.set, 20, 0, 0, DIRECT);
@@ -32,8 +29,6 @@ void setup() {                  // Main Arduino setup
 
   blynkSetup(); // Setup Blynk modes
   countdownSetup(); // Setup countdown mode
-
-  shuffle(); // Shuffle motor offset order once
 
   motorSetup(); // Setup motor and PID control
 }
