@@ -4,32 +4,41 @@
 // Global Declarations // ==================================================
 
 // Assigning motor constructors (default 0)
-motorClass motorA(0, 0, dirPinA), motorB(0, 0, dirPinB), motorC(0, 0, dirPinC);
+motorClass motorA(0, 0, 0, dirPinA), motorB(0, 0, 0, dirPinB), motorC(0, 0, 0, dirPinC);
 
-int orderIndex = 1; // Initial order index
+uint8_t orderIndex = 0; // Initial order index
 
-int rotTbl[] = {Zero, ZeroFive, ZeroFive + FiveTen, ZeroFive + FiveTen + TenFift, ZeroFive + FiveTen + TenFift + FiftTwenty}; // Assigning rotation lookup table [0, 0-5, 0-10, 0-15, 0-20]
-int actTbl[] = {ZeroFive + ZeroFive, ZeroFive + FiveTen, FiveTen + TenFift, TenFift + FiftTwenty}; // Assigning actuation lookup table [0-5, 5-10, 10-15, 15-20]
+double rotTbl[] = {Zero, ZeroFive, ZeroFive + FiveTen, ZeroFive + FiveTen + TenFift, ZeroFive + FiveTen + TenFift + FiftTwenty}; // Assigning rotation lookup table [0, 0-5, 0-10, 0-15, 0-20]
+double actTbl[] = {ZeroFive + ZeroFive, ZeroFive + FiveTen, FiveTen + TenFift, TenFift + FiftTwenty}; // Assigning actuation lookup table [-5-5, 0-10, 5-15, 10-20]
 
+uint8_t motionOrder[20]; // Mode motion order order arrays
+uint8_t urbanOrder[] = {1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1}; // Urban mode motion order
+uint8_t motorwayOrder[] = {1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1}; // Urban mode motion order
+uint8_t undergroundOrder[] = {5,5,8,7,9, 6,6,6,5,5, 2,2,5,5,4, 4,5,2,2,2}; // Urban mode motion order
+uint8_t busOrder[] = {2,2,3,6,9, 6,5,4,7,4, 1,1,4,5,5, 5,5,5,6,9}; // Urban mode motion order
+uint8_t trainOrder[] = {1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1}; // Urban mode motion order
 
-int motionOrder[20]; // Mode motion order order arrays
-int urbanOrder[] = {1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1}; // Urban mode motion order
+// External Functions // ===================================================
 
-void motorInitialise() {          // Initialising motors
+void motorInitialise() { // Initialising motors // -------------------------
 
-  pinMode(MotorPinA, INPUT_PULLUP); // Initialise Motor A interrupt inputs
-  enableInterrupt(MotorPinA, assignEncoderA, FALLING);
+  pinMode(intPinA, INPUT_PULLUP); // Initialise Motor A interrupt inputs
+  enableInterrupt(intPinA, assignEncoderA, FALLING);
 
-  pinMode(MotorPinB, INPUT_PULLUP); // Initialise Motor B interrupt inputs
-  enableInterrupt(MotorPinB, assignEncoderB, FALLING);
+  pinMode(intPinB, INPUT_PULLUP); // Initialise Motor B interrupt inputs
+  enableInterrupt(intPinB, assignEncoderB, FALLING);
 
-  pinMode(MotorPinC, INPUT_PULLUP); // Initialise Motor C interrupt inputs
-  enableInterrupt(MotorPinC, assignEncoderC, FALLING);
+  pinMode(intPinC, INPUT_PULLUP); // Initialise Motor C interrupt inputs
+  enableInterrupt(intPinC, assignEncoderC, FALLING);
+
+  pinMode(dirPinA, OUTPUT); // Initialise motor direction pins
+  pinMode(dirPinB, OUTPUT);
+  pinMode(dirPinC, OUTPUT);
 }
 
 // External Functions // ===================================================
 
-void setMode(char mode) {         // Update desired motor position for chosen mode
+void setMode(uint8_t mode) { // Update desired motor position for chosen mode //
 
   switch (mode) {
     case urban:
@@ -40,11 +49,25 @@ void setMode(char mode) {         // Update desired motor position for chosen mo
 
     case motorway:
       motorA.increment = 1; motorB.increment = 1; motorC.increment = 1;
+      memcpy(motionOrder, motorwayOrder, sizeof motionOrder); // Assign the current motion order with urban preset
 
       break;
 
     case underground:
       motorA.increment = 1; motorB.increment = 1; motorC.increment = 1;
+      memcpy(motionOrder, undergroundOrder, sizeof motionOrder); // Assign the current motion order with urban preset
+
+      break;
+
+    case bus:
+      motorA.increment = 1; motorB.increment = 1; motorC.increment = 1;
+      memcpy(motionOrder, busOrder, sizeof motionOrder); // Assign the current motion order with urban preset
+
+      break;
+
+    case train:
+      motorA.increment = 1; motorB.increment = 1; motorC.increment = 1;
+      memcpy(motionOrder, trainOrder, sizeof motionOrder); // Assign the current motion order with urban preset
 
       break;
   }
@@ -52,15 +75,32 @@ void setMode(char mode) {         // Update desired motor position for chosen mo
 
 // Internal Functions // ===================================================
 
-void motorClass::Reset() {        // Reset encoder and set positions
+void motorClass::SetScaling(uint8_t motorLabel) { // Assigns set scaling based on direction pin passed //
 
-  encoderPos = 0; // Reset and update motor PID input
-  count = 0; 
-  set = setScaling; // Reset setpoint
-  analogWrite(dirPin, dir); // Update rotation directions
+  switch(motorLabel) {
+    case dirPinA:
+      set = scalingA;
+    break;
+
+    case dirPinB:
+      set = scalingB;
+    break;
+
+    case dirPinC:
+      set = scalingC;
+    break;
+  }
 }
 
-void motorClass::UpdateSet() {    // Update PID control input parameters
+void motorClass::Reset() { // Reset encoder and set positions // -----------
+
+  encoderCount = 0; // Reset and update motor PID input
+  count = 0; 
+  SetScaling(dirPin); // Reset setpoint
+  digitalWrite(dirPin, dir); // Update respective rotation directions
+}
+
+void motorClass::UpdateSet() { // Update PID control input parameters // ---
 
   count += increment; // Running total of motor position
 
@@ -68,16 +108,17 @@ void motorClass::UpdateSet() {    // Update PID control input parameters
     Reset(); // Reset encoder values
   }
 
-  in = encoderPos; // Update motor PID input
+  SetScaling(dirPin); // Reset setpoint
+  in = encoderCount; // Update motor PID input
 }
 
-void motorClass::StartEnd(bool &cycleFlag, int cycleCurrent) {    // Assign target count values from the rotation lookup table
+void motorClass::StartEnd(bool &cycleFlag, uint8_t cycleCurrent) { // Assign target count values from the rotation lookup table //
 
-// Offset initial target position by -5 mm
-  if (dir == forward) {
+  // Offset initial target position by -5 mm
+  if (dir ^ cycleCurrent) { // Bitwise XOR to identify forward/reverse, start/end combinations
     targetCount = rotTbl[cycleIndex - 1];
   }
-  else if (dir == reverse) {
+  else {
     targetCount = rotTbl[cycleIndex + 1];
   }
 
@@ -87,53 +128,61 @@ void motorClass::StartEnd(bool &cycleFlag, int cycleCurrent) {    // Assign targ
   cycleFlag = false; // Set the current flag value to false
 }
 
-void motorClass::Actuation(bool &cycleFlag, int cycleCurrent) {   // Assign target count values from the actuation lookup table
+void motorClass::Actuation(bool &cycleFlag, uint8_t cycleCurrent) { // Assign target count values from the actuation lookup table //
 
   dir = forward; // Set synchronous forward actuation
   targetCount = actTbl[cycleIndex]; // Change encoder target count
+
+  Reset(); // Reset encoder values
 
   cycleMode = cycleCurrent; // Update current cycle mode
   cycleFlag = false; // Set the current flag value to false
 }
 
-void motorClass::Encoder() {      // Encoder count of the number of motor shaft rotations (pre-gearing)
+void motorClass::FlipDir() { // Flip motor direction // --------------------
+  if (dir) {
+    dir = LOW;
+  }
+  else {
+    dir = HIGH;
+  }
+}
 
-  encoderPos++; // Increment rotation count (pre-gearing)
+void motorClass::Encoder() { // Encoder count of the number of motor shaft rotations (pre-gearing) //
 
-  if (encoderPos > targetCount && cycleMode == FromNeutral) { // Triggers when in position from neutral
-    Reset();
-    cycleInPos = true; // Set the next flag to true
+  encoderCount++; // Increment rotation count (pre-gearing)
+
+  if (encoderCount > targetCount && cycleMode == FromNeutral) { // Triggers when in position from neutral
+    cycleInPos = true; // Set the next flag to true    
   }
 
-  else if (encoderPos > targetCount && cycleMode == NeutralAct && dir == forward) { // Triggers at the top of the actuation cycle
-    Reset();
+  else if (encoderCount > targetCount && cycleMode == NeutralAct && dir == forward) { // Triggers at the top of the actuation cycle
     dir = reverse; // Reverse direction
-  }
-
-  else if (encoderPos > targetCount && cycleMode == NeutralAct && dir == reverse) { // Triggers at the bottom of the actuation cycle
-      Reset();
-      cycleEnd = true; // Set the next flag to true
-  }
-
-  else if (encoderPos > targetCount && cycleMode == ToNeutral) { // Triggers when back to neutral
     Reset();
-    cycleReset = true; // Set the next flag to true
+  }
+
+  else if (encoderCount > targetCount && cycleMode == NeutralAct && dir == reverse) { // Triggers at the bottom of the actuation cycle
+    cycleEnd = true; // Set the next flag to true    
+  }
+
+  else if (encoderCount > targetCount && cycleMode == ToNeutral) { // Triggers when back to neutral
+    cycleReset = true; // Set the next flag to true    
   }
 }
 
 // Assigning Internal Functions To Interrupts // ===========================
 
-void assignEncoderA() {           // Assign Motor A encoder class functions
+void assignEncoderA() { // Assign Motor A encoder class functions // -------
 
   motorA.Encoder();
 }
 
-void assignEncoderB() {           // Assign Motor B encoder class functions
+void assignEncoderB() { // Assign Motor B encoder class functions // -------
 
   motorB.Encoder();  
 }
 
-void assignEncoderC() {           // Assign Motor C encoder class functions
+void assignEncoderC() { // Assign Motor C encoder class functions // -------
 
   motorC.Encoder();  
 }

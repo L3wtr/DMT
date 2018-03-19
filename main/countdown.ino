@@ -1,10 +1,10 @@
-void countdownSetup() {				// Setup Countdown Timer
+void countdownSetup() { // Setup Countdown Timer // ------------------------
 
   counter = timer.setInterval(1000, countdownTimer);
   timer.disable(counter);
 }
 
-void countdownTimer() {           	// Decrements counter by 1 second and formats time
+void countdownTimer() { // Counts down by 1 second and formats time // -----
 
   countRemain--; // Decrements by 1 when called
   countformat(countRemain);
@@ -13,14 +13,16 @@ void countdownTimer() {           	// Decrements counter by 1 second and formats
     timer.disable(counter);
     Blynk.virtualWrite(vInManual, LOW); // Reset manual start/stop button
     Blynk.virtualWrite(vOutTimer, "Complete");
+
+    pauseFlag = true; // Enable pause flag
   }
 }
 
-void countformat(int seconds) {		// Formats timer count to hr:min:sec display string
+void countformat(int seconds) {	// Formats timer count to hr:min:sec display string
 
-  long hours = 0;
-  long mins = 0;
-  long secs = 0;
+  int hours = 0;
+  int mins = 0;
+  int secs = 0;
   String mins_sep = ":";
   String secs_sep = ":";
 
