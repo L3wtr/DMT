@@ -1,4 +1,4 @@
-#include <SoftwareSerial.h>
+#include <SoftwareSerial.h> 
 SoftwareSerial DebugSerial(2, 3); // RX, TX
 
 #include <BlynkSimpleStream.h>
@@ -12,10 +12,13 @@ char auth[] = "6f20249fa4f84963ab71e22826a97068"; // Blynk authorize token
 BlynkTimer timer; // Declaring timer object and globals
 int countRemain, countRemainReset, counter;
 
+int audioIn, motionIn; // ADC sensor values
+int prevMotionIn, motionCount, timeout; // Motion trigger variables
+
 bool notifFlag = false; // TRUE - notifications enabled; FALSE - notifications disabled
 bool lightFlag = false; // TRUE - lighting sequence enabled; FALSE - lighting sequence disabled
-bool soundFlag = false; // TRUE - ambient noise enabled; FALSE - ambient noise disabled
-bool autoFlag = false; // TRUE - automatic mode enabled; FALSE - automatic mode disabled
+bool selectFlag = false; // TRUE - mode selected; FALSE - mode not selected
+bool autoFlag = true; // TRUE - automatic mode enabled; FALSE - automatic mode disabled
 bool pauseFlag = false; // TRUE - pause motion; FALSE - continue
 bool enabled = false; // TRUE - in motion; FALSE - stop motion
 
@@ -33,9 +36,11 @@ void setup() { // Main Arduino setup // ------------------------------------
   Blynk.begin(Serial, auth);
 
   motorSetup(); // Setup motor and PID control
+  stop();
 
   blynkSetup(); // Setup Blynk modes
   countdownSetup(); // Setup countdown mode
+  sensorInitialise(); // Setup sensor pins 
 }
 
 void loop() { // Main Arduino loop // -------------------------------------
@@ -43,10 +48,14 @@ void loop() { // Main Arduino loop // -------------------------------------
   Blynk.run(); // Enables Blynk
   timer.run(); // Enables Blynk countdown
 
-  if (enabled){
-  	motorLoop(); // Motor loop functions
+  if (autoFlag) { // If check for motion sensor trigger when automatic mode is enabled
+    motionCheck();
   }
-  else {
-  	stop();
+
+  if (enabled) { // If manual mode is activated
+   	motorLoop(); // Motor loop functions
+   }
+   else{
+    stop();
   }
 }

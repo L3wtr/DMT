@@ -7,20 +7,19 @@
 #define motorway	2
 #define underground	3
 #define bus         4
-#define train       5
 
-#define outMin 		20 // Minimum PID output value
-#define outMax 		50 // Maximum PID output value
+#define outMin 		0 // Minimum PID output value
+#define outMax 		200 // Maximum PID output value
 
 #define outPinA		3 // Arduino motor output pins (must be PWM output)
-#define outPinB		0
-#define outPinC		0
+#define outPinB		12
+#define outPinC		13
 
 #define intPinA	    7 // Arduino interrupt input pins (must share the same interrupt vectors)
 #define intPinB	    0
 #define intPinC 	0
 
-#define dirPinA     3 // Direction pin number associated with each motor
+#define dirPinA     8 // Direction pin number associated with each motor
 #define dirPinB     5
 #define dirPinC     9
 
@@ -93,7 +92,7 @@ extern uint8_t busOrder[20]; // Bus motion preset order
 extern uint8_t trainOrder[20]; // Train motion preset order
 
 void motorInitialise(); // Set up motor pins and interrupt functions
-void setMode(uint8_t mode); // Select 1 of 9 motor positioning combination modes
+void setVehicle(uint8_t vehicle); // Assign 1 of 9 motor positioning combination modes
 
 void assignEncoderA(); // Assign the encoder increment function to Motor A when called
 void assignEncoderB(); // Assign the encoder increment function to Motor B when called

@@ -1,95 +1,100 @@
 // Definitions // ==========================================================
 
-#define vInAuto     0
-#define vInManual   1
-#define vInNotif    2
+#define vInMode     0
+#define vInStart    1
+#define vInVehicle  2
 #define vInTimer    3
-#define vInMode     4
+#define vInLight    4
+#define vInNotif    5
 
-#define vOutTimer   5
-#define vOutAuto    6
-#define vOutMode    7
-
-#define vInLight    8
-#define vInSound    9
-#define vOutLight   10
-#define vOutSound   11
-
-bool test;
+#define vOutText    6
+#define vPlotAudio  7
+#define vPlotMotion 8
 
 // Blynk Main Functions // =================================================
 
 void blynkSetup() { // Setup all relevant Blynk settings // ----------------
 
   // Set Default Button Labels
-  Blynk.virtualWrite(vInAuto, LOW);
-  Blynk.virtualWrite(vInManual, LOW);
-  Blynk.virtualWrite(vInNotif, LOW);
+  Blynk.virtualWrite(vInStart, LOW);
+  Blynk.virtualWrite(vInMode, LOW);
   Blynk.virtualWrite(vInTimer, 0);
 
-  Blynk.virtualWrite(vInLight, LOW);
-      Blynk.virtualWrite(vOutLight, "Press to enable lighting sequence");
-  Blynk.virtualWrite(vInSound, LOW);
-      Blynk.virtualWrite(vOutSound, "Press to enable ambient noise");
+  Blynk.virtualWrite(vInLight, 2); // Defaults to disabled (option 2)
+  Blynk.virtualWrite(vInNotif, 2);
+
+  Blynk.virtualWrite(vOutText, "Please select mode:");
 }
 
-BLYNK_WRITE(vInAuto) { // Sets automatic mode on button press // -----------
+// Blynk Push Functions // =================================================
 
-  if (param.asInt()) {
-    Blynk.virtualWrite(vOutAuto, "Automatic Mode: Enabled");
+BLYNK_WRITE(vInMode) { // Sets automatic mode on button press // -----------
 
+  pauseAll();
+  motionReset(); // Reset motion sensor
+  
+  if (!selectFlag) {
+    selectFlag = true; // Mode selected
+  }
+
+  if (param.asInt() == 1) {
     autoFlag = true; // Enable automatic mode flag
 
     // Pause and disable manual mode if running
-    Blynk.virtualWrite(vInManual, LOW); // If no time set, prevent change
     timer.disable(counter);
-    Blynk.virtualWrite(vOutTimer, "Paused");
   }
-  else {
-    Blynk.virtualWrite(vOutAuto, "Automatic Mode: Disabled");
-
+  else if (param.asInt() == 2) {
     autoFlag = false; // Disable automatic mode flag
   }
 }
 
-BLYNK_WRITE(vInManual) { // Sets manual mode on button press // -----------
+BLYNK_WRITE(vInStart) { // Starts motion on button press // ----------------
 
-  if (param.asInt()) {
-    if (countRemain) {
-      timer.enable(counter);
+  if (selectFlag == false) {
+      Blynk.virtualWrite(vInStart, LOW); // Reset start button if no mode is selected
+  }
+  else 
+    if (param.asInt() == 1) {
 
-      autoFlag = false; // Disable automatic mode flag
-      pauseFlag = false; // Disable pause flag
-      enabled = true; // Start motion
+      if (autoFlag) {
+        Blynk.virtualWrite(vOutText, "Automatic mode active");
+      }
+      else {
 
-      // Reset and disable automatic mode if running
-      Blynk.virtualWrite(vInAuto, LOW); // If no time set, prevent change
-      Blynk.virtualWrite(vOutAuto, "Automatic Mode: Disabled");
+        if (countRemain) {
+          timer.enable(counter);
+
+          pauseFlag = false; // Disable pause flag
+          enabled = true; // Start motion
+        }
+        else {
+          Blynk.virtualWrite(vInStart, LOW);
+          Blynk.virtualWrite(vOutText, "Set timer length in settings");
+        }
+      }
     }
     else {
-      Blynk.virtualWrite(vInManual, LOW); // If no time set, prevent change
-      Blynk.virtualWrite(vOutTimer, "Please set time in settings menu");
-    }
-  }
-  else {
-    timer.disable(counter); // Pause timer
-    Blynk.virtualWrite(vOutTimer, "Paused");
 
-    pauseFlag = true; // Enable pause flag
-  }
+      pauseAll();
+    }
 }
 
 BLYNK_WRITE(vInNotif) { // Enables notifications on button press // --------
 
-  if (param.asInt()) {
+  if (param.asInt() == 1) {
     notifFlag = true; // Notifcations are enabled
   }
-  else {
+  else if (param.asInt() == 2){
     notifFlag = false; // Notifications are disabled
   }
 }
 
 BLYNK_WRITE(vInTimer) { // Sets manual timer setting on slider change // ---
+
+  if (enabled) { // Pause motion if changing timer settings while enabled
+
+    pauseAll();
+  }
 
   if (timer.isEnabled(counter)) { // If timer is running, prevent change
     Blynk.virtualWrite(vInTimer, param.asInt());
@@ -101,62 +106,46 @@ BLYNK_WRITE(vInTimer) { // Sets manual timer setting on slider change // ---
   }
 }
 
-BLYNK_WRITE(vInMode) { // Sets motion mode on menu change // ---------------
+BLYNK_WRITE(vInVehicle) { // Sets motion mode on menu change // ------------
 
-  uint8_t selectMode = param.asInt();
+  uint8_t selectVehicle = param.asInt();
 
-  switch (selectMode) {
+  switch (selectVehicle) {
     case urban: // Urban road mode
-      Blynk.virtualWrite(vOutMode, 60);
-      setMode(urban);
+      setVehicle(urban);
     break;
 
     case motorway: // Motorway mode
-      Blynk.virtualWrite(vOutMode, 80);
-      setMode(motorway);
+      setVehicle(motorway);
     break;
 
     case underground: // Underground mode
-      Blynk.virtualWrite(vOutMode, 20);
-      setMode(underground);
+      setVehicle(underground);
     break;
 
     case bus: // Bus mode
-      Blynk.virtualWrite(vOutMode, 40);
-      setMode(bus);
-    break;
-
-    case train: // High speed train mode
-      Blynk.virtualWrite(vOutMode, 100);
-      setMode(train);
+      setVehicle(bus);
     break;
   }
 }
 
 BLYNK_WRITE(vInLight) { // Enables light sequence on button press // -------
 
-  if (param.asInt()) {
-    Blynk.virtualWrite(vOutLight, "Lighting sequence enabled");
-
+  if (param.asInt() == 1) {
     lightFlag = true; // Lighting sequence is enabled
   }
-  else {
-    Blynk.virtualWrite(vOutLight, "Press to enable lighting sequence");
-
+  else if (param.asInt() == 2) {
     lightFlag = false; // Lighting sequence is disabled
   }
 }
 
-BLYNK_WRITE(vInSound) { // Enables ambient noise on button press // --------
+// User Interface Functions // =============================================
 
-  if (param.asInt()) {
-    Blynk.virtualWrite(vOutSound, "Ambient noise enabled");
+void pauseAll() { // Set all pause flags and reset interface
 
-    soundFlag = true; // Ambient noise is enabled
-  }
-  else {
-    Blynk.virtualWrite(vOutSound, "Press to enable ambient noise");
+  timer.disable(counter); // Pause timer
+  Blynk.virtualWrite(vInStart, LOW);
+  Blynk.virtualWrite(vOutText, "Cradle motion paused");
 
-    soundFlag = false; // Ambient noise is disabled
-  }
+  pauseFlag = true; // Enable pause flag
 }

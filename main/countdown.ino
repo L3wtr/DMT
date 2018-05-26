@@ -11,8 +11,7 @@ void countdownTimer() { // Counts down by 1 second and formats time // -----
 
   if (!countRemain) { // When countdown reaches 0
     timer.disable(counter);
-    Blynk.virtualWrite(vInManual, LOW); // Reset manual start/stop button
-    Blynk.virtualWrite(vOutTimer, "Complete");
+    Blynk.virtualWrite(vOutText, "Complete");
 
     pauseFlag = true; // Enable pause flag
   }
@@ -43,5 +42,5 @@ void countformat(int seconds) {	// Formats timer count to hr:min:sec display str
     mins_sep = ":0";
   }
 
-  Blynk.virtualWrite(vOutTimer, hours + mins_sep + mins + secs_sep + secs); // Writing to Blynk
+  Blynk.virtualWrite(vOutText, hours + mins_sep + mins + secs_sep + secs); // Writing to Blynk
 }

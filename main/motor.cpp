@@ -12,11 +12,10 @@ double rotTbl[] = {Zero, ZeroFive, ZeroFive + FiveTen, ZeroFive + FiveTen + TenF
 double actTbl[] = {ZeroFive + ZeroFive, ZeroFive + FiveTen, FiveTen + TenFift, TenFift + FiftTwenty}; // Assigning actuation lookup table [-5-5, 0-10, 5-15, 10-20]
 
 uint8_t motionOrder[20]; // Mode motion order order arrays
-uint8_t urbanOrder[] = {1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1}; // Urban mode motion order
-uint8_t motorwayOrder[] = {1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1}; // Urban mode motion order
+uint8_t urbanOrder[] = {7,7,7,7,7, 4,5,5,5,5, 5,6,5,5,5, 5,5,5,5,5}; // Urban mode motion order
+uint8_t motorwayOrder[] = {7,3,4,5,5, 5,8,5,5,8, 8,6,6,3,6, 3,3,2,2,4}; // Urban mode motion order
 uint8_t undergroundOrder[] = {5,5,8,7,9, 6,6,6,5,5, 2,2,5,5,4, 4,5,2,2,2}; // Urban mode motion order
 uint8_t busOrder[] = {2,2,3,6,9, 6,5,4,7,4, 1,1,4,5,5, 5,5,5,6,9}; // Urban mode motion order
-uint8_t trainOrder[] = {1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1}; // Urban mode motion order
 
 // External Functions // ===================================================
 
@@ -38,36 +37,30 @@ void motorInitialise() { // Initialising motors // -------------------------
 
 // External Functions // ===================================================
 
-void setMode(uint8_t mode) { // Update desired motor position for chosen mode //
+void setVehicle(uint8_t vehicle) { // Update desired motor position for chosen vehicle case //
 
-  switch (mode) {
+  switch (vehicle) {
     case urban:
-      motorA.increment = 1; motorB.increment = 1; motorC.increment = 1; // Mode speed (### Dynamic Update TBD ####)
+      motorA.increment = 0.1; motorB.increment = 0.1; motorC.increment = 0.1; // Mode speed (### Dynamic Update TBD ####)
       memcpy(motionOrder, urbanOrder, sizeof motionOrder); // Assign the current motion order with urban preset
 
       break;
 
     case motorway:
-      motorA.increment = 1; motorB.increment = 1; motorC.increment = 1;
+      motorA.increment = 0.1; motorB.increment = 0.1; motorC.increment = 0.1;
       memcpy(motionOrder, motorwayOrder, sizeof motionOrder); // Assign the current motion order with urban preset
 
       break;
 
     case underground:
-      motorA.increment = 1; motorB.increment = 1; motorC.increment = 1;
+      motorA.increment = 0.5; motorB.increment = 0.5; motorC.increment = 0.5;
       memcpy(motionOrder, undergroundOrder, sizeof motionOrder); // Assign the current motion order with urban preset
 
       break;
 
     case bus:
-      motorA.increment = 1; motorB.increment = 1; motorC.increment = 1;
+      motorA.increment = 0.5; motorB.increment = 0.5; motorC.increment = 0.5;
       memcpy(motionOrder, busOrder, sizeof motionOrder); // Assign the current motion order with urban preset
-
-      break;
-
-    case train:
-      motorA.increment = 1; motorB.increment = 1; motorC.increment = 1;
-      memcpy(motionOrder, trainOrder, sizeof motionOrder); // Assign the current motion order with urban preset
 
       break;
   }
@@ -153,7 +146,7 @@ void motorClass::Encoder() { // Encoder count of the number of motor shaft rotat
   encoderCount++; // Increment rotation count (pre-gearing)
 
   if (encoderCount > targetCount && cycleMode == FromNeutral) { // Triggers when in position from neutral
-    cycleInPos = true; // Set the next flag to true    
+    cycleInPos = true; // Set the next flag to true
   }
 
   else if (encoderCount > targetCount && cycleMode == NeutralAct && dir == forward) { // Triggers at the top of the actuation cycle
@@ -162,11 +155,11 @@ void motorClass::Encoder() { // Encoder count of the number of motor shaft rotat
   }
 
   else if (encoderCount > targetCount && cycleMode == NeutralAct && dir == reverse) { // Triggers at the bottom of the actuation cycle
-    cycleEnd = true; // Set the next flag to true    
+    cycleEnd = true; // Set the next flag to true
   }
 
   else if (encoderCount > targetCount && cycleMode == ToNeutral) { // Triggers when back to neutral
-    cycleReset = true; // Set the next flag to true    
+    cycleReset = true; // Set the next flag to true
   }
 }
 
