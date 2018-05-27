@@ -12,16 +12,16 @@
 #define outMax 		200 // Maximum PID output value
 
 #define outPinA		3 // Arduino motor output pins (must be PWM output)
-#define outPinB		12
-#define outPinC		13
+#define outPinB		6
+#define outPinC		11
 
-#define intPinA	    7 // Arduino interrupt input pins (must share the same interrupt vectors)
-#define intPinB	    0
-#define intPinC 	0
+#define intPinA	    2 // Arduino interrupt input pins (must share the same interrupt vectors)
+#define intPinB	    5
+#define intPinC 	13
 
-#define dirPinA     8 // Direction pin number associated with each motor
-#define dirPinB     5
-#define dirPinC     9
+#define dirPinA     4 // Direction pin number associated with each motor
+#define dirPinB     7
+#define dirPinC     12
 
 #define forward     HIGH // Forward and reverse boolean
 #define reverse     LOW
@@ -89,7 +89,6 @@ extern uint8_t urbanOrder[20]; // Urban motion preset order
 extern uint8_t motorwayOrder[20]; // Motorway motion preset order
 extern uint8_t undergroundOrder[20]; // Underground motion preset order
 extern uint8_t busOrder[20]; // Bus motion preset order
-extern uint8_t trainOrder[20]; // Train motion preset order
 
 void motorInitialise(); // Set up motor pins and interrupt functions
 void setVehicle(uint8_t vehicle); // Assign 1 of 9 motor positioning combination modes

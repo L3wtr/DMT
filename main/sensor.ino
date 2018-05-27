@@ -5,7 +5,6 @@
       
 #define motionThreshold 3 // Trigger threshold for motion
 
-
 // Sensors Main Functions // ===============================================
 
 void sensorInitialise() { // Initialising sensors // -----------------------

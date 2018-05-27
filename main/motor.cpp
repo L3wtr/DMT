@@ -53,13 +53,13 @@ void setVehicle(uint8_t vehicle) { // Update desired motor position for chosen v
       break;
 
     case underground:
-      motorA.increment = 0.5; motorB.increment = 0.5; motorC.increment = 0.5;
+      motorA.increment = 0.1; motorB.increment = 0.1; motorC.increment = 0.1;
       memcpy(motionOrder, undergroundOrder, sizeof motionOrder); // Assign the current motion order with urban preset
 
       break;
 
     case bus:
-      motorA.increment = 0.5; motorB.increment = 0.5; motorC.increment = 0.5;
+      motorA.increment = 0.1; motorB.increment = 0.1; motorC.increment = 0.1;
       memcpy(motionOrder, busOrder, sizeof motionOrder); // Assign the current motion order with urban preset
 
       break;

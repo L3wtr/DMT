@@ -19,6 +19,7 @@ void blynkSetup() { // Setup all relevant Blynk settings // ----------------
   Blynk.virtualWrite(vInStart, LOW);
   Blynk.virtualWrite(vInMode, LOW);
   Blynk.virtualWrite(vInTimer, 0);
+  Blynk.virtualWrite(vInVehicle, 1); // Defaults to first menu entry (urban)
 
   Blynk.virtualWrite(vInLight, 2); // Defaults to disabled (option 2)
   Blynk.virtualWrite(vInNotif, 2);

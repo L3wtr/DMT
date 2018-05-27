@@ -11,6 +11,7 @@ char auth[] = "6f20249fa4f84963ab71e22826a97068"; // Blynk authorize token
 
 BlynkTimer timer; // Declaring timer object and globals
 int countRemain, countRemainReset, counter;
+int LEDtimer, FADEtimer;
 
 int audioIn, motionIn; // ADC sensor values
 int prevMotionIn, motionCount, timeout; // Motion trigger variables
@@ -22,7 +23,7 @@ bool autoFlag = true; // TRUE - automatic mode enabled; FALSE - automatic mode d
 bool pauseFlag = false; // TRUE - pause motion; FALSE - continue
 bool enabled = false; // TRUE - in motion; FALSE - stop motion
 
-// Declaring Motor A PID control global
+// Declaring Motor PID control globals
 PID PIDA(&motorA.in, &motorA.out, &motorA.set, 20, 0, 0, DIRECT);
 PID PIDB(&motorB.in, &motorB.out, &motorB.set, 20, 0, 0, DIRECT);
 PID PIDC(&motorC.in, &motorC.out, &motorC.set, 20, 0, 0, DIRECT);
@@ -40,6 +41,8 @@ void setup() { // Main Arduino setup // ------------------------------------
 
   blynkSetup(); // Setup Blynk modes
   countdownSetup(); // Setup countdown mode
+  lightSetup(); // Setup lighting mode
+
   sensorInitialise(); // Setup sensor pins 
 }
 
@@ -54,8 +57,16 @@ void loop() { // Main Arduino loop // -------------------------------------
 
   if (enabled) { // If manual mode is activated
    	motorLoop(); // Motor loop functions
-   }
-   else{
+  }
+  else {
     stop();
+  }
+
+  if (lightFlag) {
+    timer.enable(LEDtimer); // Start LED loop
+  }
+  else {
+    timer.disable(LEDtimer);
+    LEDsetall(0); // Set all LEDs to off
   }
 }
