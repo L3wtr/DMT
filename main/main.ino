@@ -24,9 +24,9 @@ bool pauseFlag = false; // TRUE - pause motion; FALSE - continue
 bool enabled = false; // TRUE - in motion; FALSE - stop motion
 
 // Declaring Motor PID control globals
-PID PIDA(&motorA.in, &motorA.out, &motorA.set, 20, 0, 0, DIRECT);
-PID PIDB(&motorB.in, &motorB.out, &motorB.set, 20, 0, 0, DIRECT);
-PID PIDC(&motorC.in, &motorC.out, &motorC.set, 20, 0, 0, DIRECT);
+PID PIDA(&motorA.in, &motorA.out, &motorA.set, 1.5, 15, 0, DIRECT);
+PID PIDB(&motorB.in, &motorB.out, &motorB.set, 1.5, 10, 0, DIRECT);
+PID PIDC(&motorC.in, &motorC.out, &motorC.set, 1.5, 10, 0, DIRECT);
 
 // Main // =================================================================
 

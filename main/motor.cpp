@@ -12,6 +12,7 @@ double rotTbl[] = {Zero, ZeroFive, ZeroFive + FiveTen, ZeroFive + FiveTen + TenF
 double actTbl[] = {ZeroFive + ZeroFive, ZeroFive + FiveTen, FiveTen + TenFift, TenFift + FiftTwenty}; // Assigning actuation lookup table [-5-5, 0-10, 5-15, 10-20]
 
 uint8_t motionOrder[20]; // Mode motion order order arrays
+//uint8_t urbanOrder[] = {5,5,5,5,5, 5,5,5,5,5, 5,5,5,5,5, 5,5,5,5,5}; // Urban mode motion order
 uint8_t urbanOrder[] = {7,7,7,7,7, 4,5,5,5,5, 5,6,5,5,5, 5,5,5,5,5}; // Urban mode motion order
 uint8_t motorwayOrder[] = {7,3,4,5,5, 5,8,5,5,8, 8,6,6,3,6, 3,3,2,2,4}; // Urban mode motion order
 uint8_t undergroundOrder[] = {5,5,8,7,9, 6,6,6,5,5, 2,2,5,5,4, 4,5,2,2,2}; // Urban mode motion order
@@ -41,25 +42,25 @@ void setVehicle(uint8_t vehicle) { // Update desired motor position for chosen v
 
   switch (vehicle) {
     case urban:
-      motorA.increment = 0.1; motorB.increment = 0.1; motorC.increment = 0.1; // Mode speed (### Dynamic Update TBD ####)
+      motorA.increment = 0.05; motorB.increment = 0.05; motorC.increment = 0.2; // Mode speed (### Dynamic Update TBD ####)
       memcpy(motionOrder, urbanOrder, sizeof motionOrder); // Assign the current motion order with urban preset
 
       break;
 
     case motorway:
-      motorA.increment = 0.1; motorB.increment = 0.1; motorC.increment = 0.1;
+      motorA.increment = 0.05; motorB.increment = 0.05; motorC.increment = 0.2;
       memcpy(motionOrder, motorwayOrder, sizeof motionOrder); // Assign the current motion order with urban preset
 
       break;
 
     case underground:
-      motorA.increment = 0.1; motorB.increment = 0.1; motorC.increment = 0.1;
+      motorA.increment = 0.05; motorB.increment = 0.05; motorC.increment = 0.2;
       memcpy(motionOrder, undergroundOrder, sizeof motionOrder); // Assign the current motion order with urban preset
 
       break;
 
     case bus:
-      motorA.increment = 0.1; motorB.increment = 0.1; motorC.increment = 0.1;
+      motorA.increment = 0.05; motorB.increment = 0.05; motorC.increment = 0.2;
       memcpy(motionOrder, busOrder, sizeof motionOrder); // Assign the current motion order with urban preset
 
       break;
@@ -119,6 +120,8 @@ void motorClass::StartEnd(bool &cycleFlag, uint8_t cycleCurrent) { // Assign tar
 
   cycleMode = cycleCurrent; // Update current cycle mode
   cycleFlag = false; // Set the current flag value to false
+
+  //delay(100);
 }
 
 void motorClass::Actuation(bool &cycleFlag, uint8_t cycleCurrent) { // Assign target count values from the actuation lookup table //
@@ -130,6 +133,8 @@ void motorClass::Actuation(bool &cycleFlag, uint8_t cycleCurrent) { // Assign ta
 
   cycleMode = cycleCurrent; // Update current cycle mode
   cycleFlag = false; // Set the current flag value to false
+
+  //delay(100);
 }
 
 void motorClass::FlipDir() { // Flip motor direction // --------------------

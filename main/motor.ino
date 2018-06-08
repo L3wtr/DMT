@@ -20,7 +20,7 @@ void motorSetup() {	// Setup motor and PID control // ----------------------
 void motorLoop() { // Motor code to be run every Arduino loop // -----------
 
   // Initiate the next cycle when each motor has reached a flagged position
-  if (motorA.cycleReset /*&& motorB.cycleReset && motorC.cycleReset*/) {
+  if (/*motorA.cycleReset && */motorB.cycleReset && motorC.cycleReset) {
 
     if (orderIndex > sizeof(motionOrder)) { // Reset order index after 20 samples to loop motion
       orderIndex = 0;
@@ -33,14 +33,14 @@ void motorLoop() { // Motor code to be run every Arduino loop // -----------
     motorC.StartEnd(motorC.cycleReset, FromNeutral); 
   }
 
-  else if (motorA.cycleInPos /*&& motorB.cycleInPos && motorC.cycleInPos*/) {
+  else if (/*motorA.cycleInPos && */motorB.cycleInPos && motorC.cycleInPos) {
 
     motorA.Actuation(motorA.cycleInPos, NeutralAct); // Apply actuation motion and toggle flags
     motorB.Actuation(motorB.cycleInPos, NeutralAct);
     motorC.Actuation(motorC.cycleInPos, NeutralAct);
   }
 
-  else if (motorA.cycleEnd /*&& motorB.cycleEnd && motorC.cycleEnd*/) {
+  else if (/*motorA.cycleEnd && */motorB.cycleEnd && motorC.cycleEnd) {
 
     motorA.FlipDir(); motorB.FlipDir(); motorC.FlipDir(); // Reverse direction
 

@@ -31,14 +31,14 @@
 #define NeutralAct  2
 
 #define Zero        0 // Rotation count values corresponding to specified linear actuation
-#define ZeroFive    11.2
-#define FiveTen     12.1
-#define TenFift     14.5
-#define FiftTwenty  32.2
+#define ZeroFive    11.2 * 3
+#define FiveTen     12.1 * 3
+#define TenFift     14.5 * 3
+#define FiftTwenty  32.2 * 3
 
 #define scalingA    (0.1 * count) // Scaling increment speed calibrated to motor speed
-#define scalingB    (0.1 * count)
-#define scalingC    (0.1 * count)
+#define scalingB    (0.8 * count)
+#define scalingC    (2 * count)
 
 // Internal Declarations // ================================================
 
